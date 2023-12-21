@@ -3,9 +3,9 @@ import axios from 'axios';
 const BASE_URL = 'https://dummyjson.com';
 
 // Function to get all products
-export const getAllProductsAPI = async () => {
+export const getAllProductsAPI = async (limit, skip) => {
     try {
-        const response = await axios.get(`${BASE_URL}/products`);
+        const response = await axios.get(`${BASE_URL}/products?skip=${skip}&limit=${limit}`);
         return response.data;
     } catch (error) {
         throw error;

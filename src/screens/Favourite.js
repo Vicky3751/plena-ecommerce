@@ -94,7 +94,7 @@ const Favourite = (props) => {
                           <View style={styles.productDetailsWrap}>
                             <View>
                               <Text style={[commonStyles.body02Semibold, { color: "#1E222B" }]} >${item.price}</Text>
-                              <Text style={[commonStyles.body02Regular, { color: "#616A7D" }]}>{item.title}</Text>
+                              <Text style={[commonStyles.body02Regular, { color: "#616A7D", maxWidth: 100 }]}>{item.title}</Text>
                             </View>
                             <TouchableOpacity onPress={() => addToCart(item)}>
                               <Image source={require("../assets/images/product_plus.png")} style={{ width: 32, height: 32 }} />

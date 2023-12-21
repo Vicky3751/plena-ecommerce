@@ -1,5 +1,5 @@
 import { View, ScrollView, Text, StyleSheet, StatusBar, Image, KeyboardAvoidingView, TouchableOpacity, ToastAndroid } from 'react-native';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import commonStyles from '../styles/styles';
 import CustomInput from '../components/CustomInput';
 import CustomDropdown from '../components/CustomDropdown';
@@ -31,6 +31,8 @@ const delivery_time_options = [
 const Home = (props) => {
 
     const dispatch = useDispatch()
+    const scrollViewRef = useRef(null);
+
 
     const [selectedDeliveryTime, setSelectedDeliveryTime] = useState(null)
     const [selectedDelivery, setSelectedDelivery] = useState(null);
@@ -39,11 +41,26 @@ const Home = (props) => {
     const cart = useSelector(state => state.cartProducts)
     const fav = useSelector(state => state.favProducts)
 
+    const [limit, setLimit] = useState(10)
+    const [skip, setSkip] = useState(0)
+    const [result, setResult] = useState({})
 
 
     useEffect(() => {
         getAllProducts()
-    }, [])
+    }, [limit, skip])
+    const handleNext = () => {
+        setSkip(skip + limit);
+    };
+
+    const handlePrev = () => {
+        setSkip(Math.max(0, skip - limit));
+    };
+
+    const handleChangePerPage = (newLimit) => {
+        setLimit(newLimit);
+        setSkip(0); // Reset skip to the first page when changing items per page
+    };
 
     const onSelectDelivery = (value) => {
         ////console.log(value);
@@ -66,10 +83,12 @@ const Home = (props) => {
 
 
     const getAllProducts = async () => {
-        const result = await getAllProductsAPI()
+        const result = await getAllProductsAPI(limit, skip)
         console.log(result)
         if (result) {
+            setResult(result)
             dispatch(setAllProducts(result?.products))
+            scrollToTop();
         }
     }
 
@@ -114,6 +133,10 @@ const Home = (props) => {
         }
     }
 
+    const scrollToTop = () => {
+        scrollViewRef.current.scrollTo({ y: 0, animated: true });
+    };
+
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -121,7 +144,7 @@ const Home = (props) => {
         >
             <View style={styles.container}>
                 <StatusBar backgroundColor="#2A4BA0" barStyle="light-content" />
-                <ScrollView contentContainerStyle={styles.scrollContent}>
+                <ScrollView contentContainerStyle={styles.scrollContent} ref={scrollViewRef}>
                     <View style={[styles.homeHeader]}>
                         <View style={styles.introHeader}>
                             <Text style={[commonStyles.headerLegend, styles.introHeaderText]}>Hey, Vicky</Text>
@@ -190,7 +213,7 @@ const Home = (props) => {
                                             <View style={styles.productDetailsWrap}>
                                                 <View>
                                                     <Text style={[commonStyles.body02Semibold, { color: "#1E222B" }]} >${item.price}</Text>
-                                                    <Text style={[commonStyles.body02Regular, { color: "#616A7D" }]}>${item.title}</Text>
+                                                    <Text style={[commonStyles.body02Regular, { color: "#616A7D", maxWidth: 100 }]}>{item.title}</Text>
                                                 </View>
                                                 <TouchableOpacity onPress={() => addToCart(item)}>
                                                     <Image source={require("../assets/images/product_plus.png")} style={{ width: 32, height: 32 }} />
@@ -209,6 +232,21 @@ const Home = (props) => {
                                     ))
                                 }
                             </View>
+                        </View>
+                        <View>
+                            <View style={[styles.dropdown, { justifyContent: 'space-around' }]}>
+                                <TouchableOpacity onPress={handlePrev}><Text style={{ fontSize: 16, fontFamily: 'Manrope-Bold', color: '#2A4BA0' }}>Prev</Text></TouchableOpacity>
+                                <View><Text>Page {Math.ceil((skip + 1) / limit)} of {Math.ceil(result.total / limit)}</Text></View>
+                                <TouchableOpacity onPress={handleNext}><Text style={{ fontSize: 16, fontFamily: 'Manrope-Bold', color: '#2A4BA0' }}>Next</Text></TouchableOpacity>
+                            </View>
+
+                            {/* Dropdown to change items per page */}
+                            {/* <View style={styles.dropdown}>
+                                <Text>Show:</Text>
+                                <TouchableOpacity onPress={() => handleChangePerPage(10)}><Text>10</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => handleChangePerPage(20)}><Text>20</Text></TouchableOpacity>
+                                <TouchableOpacity onPress={() => handleChangePerPage(50)}><Text>50</Text></TouchableOpacity>
+                            </View> */}
                         </View>
                     </View>
                 </ScrollView>
@@ -327,5 +365,10 @@ const styles = StyleSheet.create({
         width: 150,
         height: 100,
         borderRadius: 8
-    }
+    },
+    dropdown: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 24,
+    },
 });

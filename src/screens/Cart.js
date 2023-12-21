@@ -114,7 +114,7 @@ const Cart = (props) => {
                           <Image source={require("../assets/images/image_dummy_3.png")} />
                         </View>
                         <View style={styles.cartItemInfo}>
-                          <Text style={[commonStyles.body02Regular, { color: "#1E222B" }]}>{product?.item?.title}</Text>
+                          <Text style={[commonStyles.body02Regular, { color: "#1E222B", maxWidth : 175 }]}>{product?.item?.title}</Text>
                           <Text style={[commonStyles.body02Regular, { color: "#1E222B" }]}>${product?.item?.price}</Text>
                         </View>
                       </TouchableOpacity>
